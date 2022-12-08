@@ -19,10 +19,21 @@ const float toRadians = glm::pi<float>() / 180.0f;
 
 GLuint VAO, VBO, shader, uniformModel;
 
-bool direction = true;
+bool moveDirection = true;
 float triOffset = 0.0f;
-float triMaxOffset = 0.7f;
+float triMaxOffset = 0.6f;
 float triIncrement = 0.0005f;
+
+bool rotationDirection = true;
+float rotationOffset = 0.0f;
+float rotationMaxOffset = 360.0f * toRadians;
+float rotationIncrement = 0.05f * toRadians;
+
+bool scaleDirection = true;
+float scaleOffset = 1.0f;
+float scaleMaxOffset = 1.2f;
+float scaleMinOffset = 0.2f;
+float scaleIncrement = 0.001f;
 
 //Vertex Shader
 static const char* vShader = "						\n\
@@ -177,7 +188,7 @@ int main() {
 	while (!glfwWindowShouldClose(mainWindow)) {
 		glfwPollEvents();
 
-		if (direction) {
+		if (moveDirection) {
 			triOffset += triIncrement;
 		}
 		else {
@@ -185,7 +196,29 @@ int main() {
 		}
 
 		if (abs(triOffset) >= triMaxOffset) {
-			direction = !direction;
+			moveDirection = !moveDirection;
+		}
+
+		if (rotationDirection) {
+			rotationOffset += rotationIncrement;
+		}
+		else {
+			rotationOffset -= rotationIncrement;
+		}
+
+		if (abs(rotationOffset) >= rotationMaxOffset) {
+			rotationDirection = !rotationDirection;
+		}
+
+		if (scaleDirection) {
+			scaleOffset += scaleIncrement;
+		}
+		else {
+			scaleOffset -= scaleIncrement;
+		}
+
+		if (scaleOffset >= scaleMaxOffset || scaleOffset <= scaleMinOffset) {
+			scaleDirection = !scaleDirection;
 		}
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -195,8 +228,8 @@ int main() {
 
 		glm::mat4 model(1.0f);
 		model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
-		model = glm::rotate(model, 45.0f * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, scaleOffset * glm::vec3(1.0f));
+		model = glm::rotate(model, rotationOffset, glm::vec3(0.0f, 0.0f, 1.0f));
 
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
